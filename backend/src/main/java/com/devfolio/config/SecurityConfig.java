@@ -1,5 +1,6 @@
 package com.devfolio.config;
 
+import com.devfolio.security.LegacyMigratingPasswordEncoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -9,8 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 
-import java.security.MessageDigest;
-import java.util.HexFormat;
 import java.util.List;
 
 @Configuration
@@ -51,23 +50,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // 🔴 A02-01 : MD5 au lieu de BCrypt
-        return new PasswordEncoder() {
-            @Override
-            public String encode(CharSequence raw) {
-                try {
-                    MessageDigest md = MessageDigest.getInstance("MD5");
-                    byte[] hash = md.digest(raw.toString().getBytes());
-                    return HexFormat.of().formatHex(hash);
-                } catch (Exception e) {
-                    return raw.toString();
-                }
-            }
-
-            @Override
-            public boolean matches(CharSequence raw, String encoded) {
-                return encode(raw).equals(encoded);
-            }
-        };
+        return new LegacyMigratingPasswordEncoder();
     }
 }
