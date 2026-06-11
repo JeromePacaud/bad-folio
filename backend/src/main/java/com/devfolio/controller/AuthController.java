@@ -1,14 +1,18 @@
 package com.devfolio.controller;
 
+import com.devfolio.dto.RegisterRequest;
 import com.devfolio.model.User;
 import com.devfolio.repository.UserRepository;
 import com.devfolio.service.AuthService;
 import com.devfolio.service.JwtService;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -70,9 +74,9 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-        String password = request.get("password");
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+        String email = request.getEmail();
+        String password = request.getPassword();
 
         if (userRepository.findByEmail(email).isPresent()) {
             return ResponseEntity.badRequest().body(Map.of("error", "Email déjà utilisé"));
@@ -81,6 +85,16 @@ public class AuthController {
         User user = authService.register(email, password);
         String token = jwtService.generateToken(user);
         return ResponseEntity.ok(Map.of("token", token, "user", user));
+    }
+
+    // A04-04 : retourne les erreurs de validation (complexité du mot de passe, format email...)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleValidationErrors(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .findFirst()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .orElse("Données invalides");
+        return ResponseEntity.badRequest().body(Map.of("error", message));
     }
 
     @PostMapping("/reset-password/request")
