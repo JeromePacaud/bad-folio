@@ -20,7 +20,7 @@ public class AuthService {
     private PasswordEncoder passwordEncoder;
 
     public User register(String email, String password) {
-        // 🔴 A04-04 : aucune validation de complexité du mot de passe
+        // A04-04 : complexité du mot de passe validée par @StrongPassword sur RegisterRequest
         String hashedPassword = passwordEncoder.encode(password);
 
         // 🔴 A09-01 : log du mot de passe en clair
