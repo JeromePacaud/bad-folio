@@ -34,12 +34,15 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
                 // 🔴 A01-03 : endpoint admin accessible sans vérification de rôle
-                .requestMatchers("/api/admin/**").permitAll()
+                    //.requestMatchers("/api/admin/**").permitAll()
+                    .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 // 🔴 A05-01 : actuator sans protection
-                .requestMatchers("/actuator/**").permitAll()
+                //.requestMatchers("/actuator/**").permitAll()
+                    .requestMatchers("/actuator/**").hasRole("ADMIN")
                 .requestMatchers("/api/auth/**").permitAll()
                 // 🔴 A01-01 : toutes les autres routes également ouvertes
-                .anyRequest().permitAll()
+                //.anyRequest().permitAll()
+                    .anyRequest().authenticated()
             )
 
             .sessionManagement(session ->
