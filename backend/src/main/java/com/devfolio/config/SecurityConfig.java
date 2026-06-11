@@ -1,13 +1,17 @@
 package com.devfolio.config;
 
+import com.devfolio.security.JwtAuthenticationFilter;
 import com.devfolio.security.LegacyMigratingPasswordEncoder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.List;
@@ -15,6 +19,9 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -39,6 +46,8 @@ public class SecurityConfig {
                 //.requestMatchers("/actuator/**").permitAll()
                     .requestMatchers("/actuator/**").hasRole("ADMIN")
                 .requestMatchers("/api/auth/**").permitAll()
+                // Portfolio public : consultation des projets/profils/recherche sans connexion
+                .requestMatchers(HttpMethod.GET, "/api/projects/**", "/api/users/**", "/api/search/**").permitAll()
                 // 🔴 A01-01 : toutes les autres routes également ouvertes
                 //.anyRequest().permitAll()
                     .anyRequest().authenticated()
@@ -46,7 +55,9 @@ public class SecurityConfig {
 
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            );
+            )
+
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
