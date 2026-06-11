@@ -1,5 +1,6 @@
 package com.devfolio.config;
 
+import com.devfolio.security.LegacyMigratingPasswordEncoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -9,8 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 
-import java.security.MessageDigest;
-import java.util.HexFormat;
 import java.util.List;
 
 @Configuration
@@ -34,12 +33,15 @@ public class SecurityConfig {
 
             .authorizeHttpRequests(auth -> auth
                 // 🔴 A01-03 : endpoint admin accessible sans vérification de rôle
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                    //.requestMatchers("/api/admin/**").permitAll()
+                    .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 // 🔴 A05-01 : actuator sans protection
-                .requestMatchers("/actuator/**").permitAll()
+                //.requestMatchers("/actuator/**").permitAll()
+                    .requestMatchers("/actuator/**").hasRole("ADMIN")
                 .requestMatchers("/api/auth/**").permitAll()
                 // 🔴 A01-01 : toutes les autres routes également ouvertes
-                .anyRequest().permitAll()
+                //.anyRequest().permitAll()
+                    .anyRequest().authenticated()
             )
 
             .sessionManagement(session ->
@@ -51,23 +53,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // 🔴 A02-01 : MD5 au lieu de BCrypt
-        return new PasswordEncoder() {
-            @Override
-            public String encode(CharSequence raw) {
-                try {
-                    MessageDigest md = MessageDigest.getInstance("MD5");
-                    byte[] hash = md.digest(raw.toString().getBytes());
-                    return HexFormat.of().formatHex(hash);
-                } catch (Exception e) {
-                    return raw.toString();
-                }
-            }
-
-            @Override
-            public boolean matches(CharSequence raw, String encoded) {
-                return encode(raw).equals(encoded);
-            }
-        };
+        return new LegacyMigratingPasswordEncoder();
     }
 }

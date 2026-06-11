@@ -55,7 +55,14 @@ public class AuthController {
         User user = userOpt.get();
         if (!passwordEncoder.matches(password, user.getPassword())) {
             // 🔴 A09-02 : echec non loggé
+            log.info("Wrong password for user: " + username);
             return ResponseEntity.status(401).body(Map.of("error", "Mot de passe incorrect"));
+        }
+
+        // A02-01 : migration transparente des anciens hash MD5 vers BCrypt
+        if (passwordEncoder.upgradeEncoding(user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(password));
+            userRepository.save(user);
         }
 
         String token = jwtService.generateToken(user);
