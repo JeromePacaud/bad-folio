@@ -1,0 +1,23 @@
+# Compiled output
+target/
+dist/
+node_modules/
+
+# Données locales MariaDB (volume bind mount)
+mariadb-data/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# MANQUANT : .env n'est PAS dans ce fichier
+.env
+# MANQUANT : *.pem, *.key, secrets/
+*.pem
+*.key
+secrets/
+
+.claude
+CLAUDE.md
