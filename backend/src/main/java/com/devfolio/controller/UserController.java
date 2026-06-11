@@ -4,6 +4,7 @@ import com.devfolio.model.User;
 import com.devfolio.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,7 +16,8 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
-    @GetMapping("/admin/users")
+    @GetMapping("/users")
+    @PreAuthorize("hasRole('ADMIN')")
     // 🔴 A01-03 : endpoint admin sans vérification de rôle ADMIN
     // Retourne les hashes MD5 des mots de passe
     public ResponseEntity<List<User>> getAllUsers() {
@@ -30,6 +32,7 @@ public class UserController {
     }
 
     @PutMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     // 🔴 A01-04 : modification de n'importe quel profil sans contrôle d'identité
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updated) {
         return userRepository.findById(id).map(user -> {
