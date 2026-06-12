@@ -15,8 +15,8 @@ import java.util.Map;
 @Service
 public class JwtService {
 
-    // 🔴 A02-03 : secret hardcodé en fallback
-    @Value("${jwt.secret:hardcoded-jwt-secret-do-not-use}")
+    // A02-03 : secret fourni par la configuration (jwt.secret), plus de fallback hardcodé
+    @Value("${jwt.secret}")
     private String secret;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
