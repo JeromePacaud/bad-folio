@@ -19,8 +19,14 @@ async function search() {
     await loadProjects()
     return
   }
+
+  //Validation de format
+  const format = searchQuery.value.trim()
+  if (format.length > 100) return // limite longueur
+  if (!/^[a-zA-Z0-9\s\-_àéèêùûîôç]+$/.test(format)) return
+
   const { data } = await api.get('/search/projects', {
-    params: { q: searchQuery.value }
+    params: { q: format }
   })
   projects.value = data
 }

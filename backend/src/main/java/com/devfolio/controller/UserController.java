@@ -34,6 +34,7 @@ public class UserController {
     @PutMapping("/users/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     // 🔴 A01-04 : modification de n'importe quel profil sans contrôle d'identité
+    // Correction : ajout de @PreAuthorize avec comme role = ADMIN
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updated) {
         return userRepository.findById(id).map(user -> {
             user.setEmail(updated.getEmail());
