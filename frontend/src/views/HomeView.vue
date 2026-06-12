@@ -26,7 +26,7 @@ async function search() {
   if (!/^[a-zA-Z0-9\s\-_àéèêùûîôç]+$/.test(format)) return
 
   const { data } = await api.get('/search/projects', {
-    params: { q: searchQuery.value }
+    params: { q: format }
   })
   projects.value = data
 }
