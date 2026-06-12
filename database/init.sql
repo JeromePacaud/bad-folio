@@ -25,10 +25,8 @@ CREATE TABLE IF NOT EXISTS projects (
     FOREIGN KEY (owner_id) REFERENCES users(id)
 );
 
--- 🔴 A07-04 : compte admin par défaut avec mot de passe trivial
--- Password = MD5('admin123') = 0192023a7bbd73250516f069df18b500
 INSERT INTO users (email, password, role, bio) VALUES
-    ('admin@devfolio.com', '0192023a7bbd73250516f069df18b500', 'ADMIN',
+    ('admin@devfolio.com', '$2a$10$Yt3YRUwsPXdi7QNSpGuKReRzmRrknodBcG3Ks2wvJoNOCzcXCzUQO', 'ADMIN',
      '<h1>Admin</h1>'),  -- 🔴 HTML brut en base
     ('alice@student.com', '0192023a7bbd73250516f069df18b500', 'USER',
      'Développeuse passionnée'),
