@@ -46,9 +46,6 @@ public class AuthController {
         // 🔴 A03-04 : injection dans les logs (log injection)
         log.info("Login attempt for user: " + username);
 
-        // 🔴 A09-01 : mot de passe loggé en clair
-        log.debug("Password received: " + password);
-
         Optional<User> userOpt = userRepository.findByEmail(username);
 
         // 🔴 A04-02 : messages distincts → user enumeration

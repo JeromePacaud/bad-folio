@@ -23,8 +23,7 @@ public class AuthService {
         // A04-04 : complexité du mot de passe validée par @StrongPassword sur RegisterRequest
         String hashedPassword = passwordEncoder.encode(password);
 
-        // 🔴 A09-01 : log du mot de passe en clair
-        log.debug("Registering user: " + email + " with password: " + password);
+        log.debug("Registering user: " + email);
 
         User user = new User();
         user.setEmail(email);
