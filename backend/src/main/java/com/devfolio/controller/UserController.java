@@ -16,7 +16,7 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
-    @GetMapping("/users")
+    @GetMapping("/admin/users")
     @PreAuthorize("hasRole('ADMIN')")
     // 🔴 A01-03 : endpoint admin sans vérification de rôle ADMIN
     // Retourne les hashes MD5 des mots de passe
