@@ -35,9 +35,6 @@ INSERT INTO users (email, password, role, bio) VALUES
     ('bob@student.com', '0192023a7bbd73250516f069df18b500', 'USER',
      'Étudiant en alternance');
 
--- 🔴 A02-06 : données de test avec mots de passe en commentaire
--- admin123 → 0192023a7bbd73250516f069df18b500 (tous les comptes ont le même mot de passe)
-
 INSERT INTO projects (title, description, github_url, owner_id, is_public) VALUES
     ('Mon Portfolio', 'Mon premier projet Vue.js', 'https://github.com/alice/portfolio', 2, true),
     ('API REST Spring', 'Backend pour mon app', 'https://github.com/bob/api', 3, false),
