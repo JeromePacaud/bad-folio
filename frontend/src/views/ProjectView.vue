@@ -10,13 +10,12 @@ onMounted(async () => {
   const { data } = await api.get(`/projects/${route.params.id}`)
   project.value = data
 
-  // 🔴 A03-03 : XSS RÉFLÉCHI — paramètre ?ref= injecté dans le DOM
-  // URL d'attaque : /project/1?ref=<img src=x onerror=alert(document.cookie)>
+  // A03-03 : paramètre ?ref= affiché en texte brut (pas de innerHTML) pour éviter le XSS réfléchi
   const refParam = new URLSearchParams(window.location.search).get('ref')
   if (refParam) {
     const banner = document.getElementById('ref-banner')
     banner.style.display = 'block'
-    banner.innerHTML = `Vous venez de : ${refParam}`
+    banner.textContent = `Vous venez de : ${refParam}`
   }
 })
 </script>
