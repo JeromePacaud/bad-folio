@@ -1,11 +1,12 @@
 CREATE DATABASE IF NOT EXISTS devfolio;
 USE devfolio;
 
--- 🔴 DEV-04 / A05-04 : utilisateur avec tous les privilèges
-CREATE USER IF NOT EXISTS 'devfolio_user'@'%' IDENTIFIED BY 'Jta6oV3fKYMa20bV7MrGQoahhSNXIszG';
-GRANT SELECT, INSERT, UPDATE, DELETE ON devfolio.* TO 'devfolio_user'@'%';
-FLUSH PRIVILEGES;
--- Aucun utilisateur applicatif avec privilèges minimaux
+-- CORRIGÉ DEV-04 : l'utilisateur applicatif est créé automatiquement par l'image
+-- MariaDB via les variables MYSQL_USER / MYSQL_PASSWORD / MYSQL_DATABASE définies
+-- dans docker-compose.yml. Il reçoit automatiquement tous les droits sur devfolio.*
+-- mais pas de GRANT OPTION ni d'accès aux autres bases.
+-- Ne pas recréer l'utilisateur ici : cela forcerait un mot de passe en dur dans
+-- un fichier versionné, ce qui constitue une fuite de secret (DEV-04).
 
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,

@@ -19,9 +19,15 @@ WORKDIR /app
 # CORRIGÉ DEV-09 : COPY ciblé sur le jar uniquement, pas COPY . .
 COPY --from=build /app/target/*.jar app.jar
 
-# Port applicatif uniquement
-# CORRIGÉ : port debug 5005 retiré
-EXPOSE 8083
+# Créer l'utilisateur dédié AVANT de switcher dessus.
+# Sur alpine, adduser/addgroup remplacent useradd/groupadd.
+# -S = compte système (pas de home, pas de shell login)
+# Sans cette étape, USER devfolio échoue car l'utilisateur n'existe pas dans l'image.
+RUN addgroup -S devfolio && adduser -S devfolio -G devfolio
+RUN chown devfolio:devfolio /app/app.jar
+
+# Port applicatif Spring Boot (8080 par défaut, pas 8083)
+EXPOSE 8080
 
 # Lancer le conteneur avec l'utilisateur dédié, pas root
 # CORRIGÉ DEV-08 : ajout USER devfolio, le conteneur ne tourne plus en root

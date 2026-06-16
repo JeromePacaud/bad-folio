@@ -6,8 +6,10 @@ services:
     # 🔴 DEV-03 : port 3306 exposé sur 0.0.0.0 (accessible depuis Internet)
     # CORRIGÉ DEV-03 : port supprimé, MariaDB accessible uniquement via le réseau interne
     environment:
-      # 🔴 DEV-04 : pas de compte applicatif séparé
-      # CORRIGÉ DEV-04 : compte applicatif ajouté
+      # CORRIGÉ DEV-04 : compte applicatif créé automatiquement par l'image MariaDB
+      # via MYSQL_USER/MYSQL_PASSWORD/MYSQL_DATABASE — pas besoin de CREATE USER dans init.sql
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: devfolio
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
@@ -30,9 +32,9 @@ services:
     # 🔴 : pas de depends_on avec condition healthy
     depends_on:
       - mariadb
-    ports:
-      - "8081:8080"
-    # Secrets (DB_HOST/DB_USER/DB_PASSWORD/JWT_SECRET, etc.) fournis via .env, non versionné
+    # Port hôte retiré : le frontend (nginx) proxy déjà /api/ → backend:8080
+    # via le réseau Docker frontend-net. Exposer 8081 donnerait accès direct
+    # à l'API depuis Internet, contournant le proxy et le pare-feu.
     env_file:
       - .env
     environment:
@@ -77,6 +79,9 @@ services:
 # CORRIGÉ DEV-05 : deux réseaux isolés — backend-net et frontend-net
 networks:
   backend-net:
-    driver: bridge
+    # internal: true — MariaDB et backend ne peuvent pas initier de connexions
+    # sortantes vers Internet (défense en profondeur : un conteneur compromis
+    # ne peut pas exfiltrer de données ou télécharger un payload)
+    internal: true
   frontend-net:
     driver: bridge
