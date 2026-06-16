@@ -1,4 +1,4 @@
-# 🔴 DEV-07 : image complète non officielle au lieu de eclipse-temurin:21-jre-alpine
+# Étape 1 : build de l'application avec Maven
 FROM maven:3.9-eclipse-temurin-21 AS build
 
 WORKDIR /app
@@ -9,17 +9,24 @@ RUN mvn dependency:go-offline -B
 COPY src ./src
 RUN mvn package -DskipTests -B
 
-# 🔴 DEV-07 : image complète au lieu de JRE alpine minimale
-FROM eclipse-temurin:21-jre
+# Étape 2 : image finale allégée (alpine = image minimale, réduit la surface d'attaque)
+# CORRIGÉ DEV-07 : remplacé eclipse-temurin:21-jre par eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 
-# 🔴 DEV-08 : pas de USER — tourne en root
 WORKDIR /app
 
-# 🔴 DEV-09 : pas de .dockerignore — COPY . . copie .env, target/, etc.
+# Copie uniquement le jar compilé, pas les sources
+# CORRIGÉ DEV-09 : COPY ciblé sur le jar uniquement, pas COPY . .
 COPY --from=build /app/target/*.jar app.jar
 
-# 🔴 : expose le port de debug JVM
-EXPOSE 8083 5005
+# Port applicatif uniquement
+# CORRIGÉ : port debug 5005 retiré
+EXPOSE 8083
 
-# 🔴 DEV-08 : -agentlib actif — port de debug JVM ouvert
-CMD ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "-jar", "app.jar"]
+# Lancer le conteneur avec l'utilisateur dédié, pas root
+# CORRIGÉ DEV-08 : ajout USER devfolio, le conteneur ne tourne plus en root
+USER devfolio
+
+# Démarrage sans agent de debug JVM
+# CORRIGÉ DEV-08 : -agentlib retiré, port de debug JVM fermé
+CMD ["java", "-jar", "app.jar"]
