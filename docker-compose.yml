@@ -32,6 +32,9 @@ services:
       - mariadb
     ports:
       - "8081:8080"
+    # Secrets (DB_HOST/DB_USER/DB_PASSWORD/JWT_SECRET, etc.) fournis via .env, non versionné
+    env_file:
+      - .env
     environment:
       # 🔴 DEV-07 : secrets en dur dans docker-compose (dupliqués du .env)
       SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/devfolio

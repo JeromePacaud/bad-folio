@@ -1,5 +1,6 @@
 package com.devfolio.controller;
 
+import com.devfolio.dto.UserUpdateRequest;
 import com.devfolio.model.User;
 import com.devfolio.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +36,10 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN')")
     // 🔴 A01-04 : modification de n'importe quel profil sans contrôle d'identité
     // Correction : ajout de @PreAuthorize avec comme role = ADMIN
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updated) {
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody UserUpdateRequest dto) {
         return userRepository.findById(id).map(user -> {
-            user.setEmail(updated.getEmail());
-            user.setRole(updated.getRole()); // 🔴 : l'appelant peut s'auto-promouvoir ADMIN
-            user.setBio(updated.getBio());
+            user.setEmail(dto.getEmail());
+            user.setBio(dto.getBio());
             return ResponseEntity.ok(userRepository.save(user));
         }).orElse(ResponseEntity.notFound().build());
     }

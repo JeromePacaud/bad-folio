@@ -23,7 +23,6 @@ onMounted(async () => {
           <th>ID</th>
           <th>Email</th>
           <th>Rôle</th>
-          <th>Mot de passe (hash)</th>
         </tr>
       </thead>
       <tbody>
@@ -35,8 +34,6 @@ onMounted(async () => {
               {{ user.role }}
             </span>
           </td>
-          <!-- 🔴 : hash MD5 du mot de passe affiché dans l'UI -->
-          <td><code>{{ user.password }}</code></td>
         </tr>
       </tbody>
     </table>

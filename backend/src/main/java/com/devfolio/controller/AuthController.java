@@ -3,8 +3,10 @@ package com.devfolio.controller;
 import com.devfolio.dto.RegisterRequest;
 import com.devfolio.model.User;
 import com.devfolio.repository.UserRepository;
+import com.devfolio.security.LoginAttemptService;
 import com.devfolio.service.AuthService;
 import com.devfolio.service.JwtService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,37 +39,42 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private LoginAttemptService loginAttemptService;
+
     @PostMapping("/login")
-    // 🔴 A04-01 : aucun rate limiting — brute force possible
-    public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> login(@RequestBody Map<String, String> request, HttpServletRequest httpRequest) {
         String username = request.get("email");
         String password = request.get("password");
+        String clientIp = httpRequest.getRemoteAddr();
 
-        // 🔴 A03-04 : injection dans les logs (log injection)
-        log.info("Login attempt for user: " + username);
+        // A04-01 : rate limiting — blocage temporaire après trop d'échecs
+        if (loginAttemptService.isBlocked(clientIp)) {
+            return ResponseEntity.status(429)
+                    .body(Map.of("error", "Trop de tentatives, veuillez réessayer plus tard"));
+        }
 
-        // 🔴 A09-01 : mot de passe loggé en clair
-        log.debug("Password received: " + password);
+        log.info("Login attempt for user: {}", username);
 
         Optional<User> userOpt = userRepository.findByEmail(username);
 
-        // 🔴 A04-02 : messages distincts → user enumeration
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.status(401).body(Map.of("error", "Utilisateur inconnu"));
+        // A04-02 : message d'erreur générique pour éviter l'énumération de comptes
+        if (userOpt.isEmpty() || !passwordEncoder.matches(password, userOpt.get().getPassword())) {
+            loginAttemptService.loginFailed(clientIp);
+            // A09-02 : tentative échouée loggée (utilisateur visé + IP), sans le mot de passe
+            log.info("Failed login attempt for user: {} from IP: {}", username, clientIp);
+            return ResponseEntity.status(401).body(Map.of("error", "Email ou mot de passe incorrect"));
         }
 
         User user = userOpt.get();
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            // 🔴 A09-02 : echec non loggé
-            log.info("Wrong password for user: " + username);
-            return ResponseEntity.status(401).body(Map.of("error", "Mot de passe incorrect"));
-        }
 
         // A02-01 : migration transparente des anciens hash MD5 vers BCrypt
         if (passwordEncoder.upgradeEncoding(user.getPassword())) {
             user.setPassword(passwordEncoder.encode(password));
             userRepository.save(user);
         }
+
+        loginAttemptService.loginSucceeded(clientIp);
 
         String token = jwtService.generateToken(user);
         return ResponseEntity.ok(Map.of("token", token, "user", user));
