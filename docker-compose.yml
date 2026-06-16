@@ -4,19 +4,26 @@ services:
   mariadb:
     image: mariadb:10.11
     # 🔴 DEV-03 : port 3306 exposé sur 0.0.0.0 (accessible depuis Internet)
-    ports:
-      - "0.0.0.0:3309:3306"
+    # CORRIGÉ DEV-03 : port supprimé, MariaDB accessible uniquement via le réseau interne
     environment:
-      # 🔴 DEV-04 : mot de passe root trivial
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: devfolio
       # 🔴 DEV-04 : pas de compte applicatif séparé
+      # CORRIGÉ DEV-04 : compte applicatif ajouté
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       # 🔴 DEV-06 : bind mount sans restriction
       - ./database:/docker-entrypoint-initdb.d
       - ./mariadb-data:/var/lib/mysql
     # Pas de healthcheck
-    # Pas de réseau isolé
+    # 🔴 DEV-05 : pas de réseau isolé
+    # CORRIGÉ DEV-05 : réseau interne isolé
+    networks:
+      - backend-net
+    # CORRIGÉ : restrictions de capabilities
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
 
   backend:
     build: ./backend
@@ -28,21 +35,45 @@ services:
     environment:
       # 🔴 DEV-07 : secrets en dur dans docker-compose (dupliqués du .env)
       SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/devfolio
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
+      # 🔴 DEV-04 : connexion en root à la base
+      # CORRIGÉ DEV-04 : compte applicatif au lieu de root
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
       # 🔴 : secret faible mais doit faire >= 256 bits (32 caractères) pour HMAC-SHA256
-      JWT_SECRET: secret123secret123secret123secret123
-      DEVFOLIO_ADMIN_PASSWORD: admin123
+      JWT_SECRET: ${JWT_SECRET}
+      DEVFOLIO_ADMIN_PASSWORD: ${DEVFOLIO_ADMIN_PASSWORD}
+
       # 🔴 A05-06 : debug activé
-      DEBUG: "true"
+      # CORRIGÉ A05-06 : DEBUG retiré
     # 🔴 DEV-05 : pas de network déclaré, utilise le réseau bridge par défaut
+    # CORRIGÉ DEV-05 : connecté aux deux réseaux pour communiquer avec mariadb et frontend
+    networks:
+      - backend-net
+      - frontend-net
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
 
   frontend:
     build: ./frontend
+    # CORRIGÉ : port 81:80 → 80:80
     ports:
-      - "81:80"
+      - "80:80"
     depends_on:
       - backend
     # 🔴 : HTTP seulement, pas de redirection HTTPS
+    networks:
+      - frontend-net
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
 
 # 🔴 DEV-05 : pas de section 'networks' — isolation réseau absente
+# CORRIGÉ DEV-05 : deux réseaux isolés — backend-net et frontend-net
+networks:
+  backend-net:
+    driver: bridge
+  frontend-net:
+    driver: bridge
