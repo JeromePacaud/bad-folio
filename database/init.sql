@@ -2,7 +2,9 @@ CREATE DATABASE IF NOT EXISTS devfolio;
 USE devfolio;
 
 -- 🔴 DEV-04 / A05-04 : utilisateur avec tous les privilèges
-GRANT ALL PRIVILEGES ON devfolio.* TO 'root'@'%' IDENTIFIED BY 'root';
+CREATE USER IF NOT EXISTS 'devfolio_user'@'%' IDENTIFIED BY 'Jta6oV3fKYMa20bV7MrGQoahhSNXIszG';
+GRANT SELECT, INSERT, UPDATE, DELETE ON devfolio.* TO 'devfolio_user'@'%';
+FLUSH PRIVILEGES;
 -- Aucun utilisateur applicatif avec privilèges minimaux
 
 CREATE TABLE IF NOT EXISTS users (
