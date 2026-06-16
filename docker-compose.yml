@@ -21,9 +21,18 @@ services:
     # CORRIGÉ DEV-05 : réseau interne isolé
     networks:
       - backend-net
-    # CORRIGÉ : restrictions de capabilities
+    # cap_drop ALL puis cap_add des seules capabilities nécessaires à MariaDB :
+    # CHOWN/SETUID/SETGID : l'entrypoint change de propriétaire et bascule vers
+    # l'utilisateur mysql au démarrage — sans elles le conteneur crashe immédiatement.
+    # DAC_OVERRIDE/FOWNER : accès aux fichiers de données lors de l'init.
     cap_drop:
       - ALL
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+      - DAC_OVERRIDE
+      - FOWNER
     security_opt:
       - no-new-privileges:true
 
