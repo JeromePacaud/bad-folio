@@ -6,8 +6,13 @@ node_modules/
 # Données locales MariaDB (volume bind mount)
 mariadb-data/
 
+# Override Docker Compose local (ex: port DB exposé pour IntelliJ/DataGrip) - jamais commité
+docker-compose.override.yml
+
 # Logs
 *.log
+*.log.*
+*.gz
 
 # OS
 .DS_Store
