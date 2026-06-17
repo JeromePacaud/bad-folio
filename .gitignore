@@ -27,4 +27,4 @@ secrets/
 .claude
 docs/
 
-
+.htpasswd

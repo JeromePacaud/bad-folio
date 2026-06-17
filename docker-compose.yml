@@ -78,6 +78,8 @@ services:
       - ./certbot-www:/var/www/certbot:ro
       # Certificats Let's Encrypt obtenus par le conteneur certbot ponctuel (lecture seule)
       - ./certbot-conf:/etc/letsencrypt:ro
+      # Fichier de mots de passe pour l'authentification HTTP Basique (non versionné)
+      - ./.htpasswd:/etc/nginx/.htpasswd:ro
     depends_on:
       - backend
     # nginx a besoin de CHOWN/SETUID/SETGID pour initialiser /var/cache/nginx
