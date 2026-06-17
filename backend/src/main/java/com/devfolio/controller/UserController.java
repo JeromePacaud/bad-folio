@@ -41,13 +41,19 @@ public class UserController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    // AJOUTÉ A01-04 : endpoint public par UUID à la place de l'ID numérique
-    // /users/profile/{uuid} — non devinable, empêche l'énumération des profils
+    // /users/profile/{uuid} — UUID non devinable, mais ça ne dispense pas du contrôle d'autorisation
     @GetMapping("/users/profile/{uuid}")
-    public ResponseEntity<User> getUserByUuid(@PathVariable String uuid) {
-        return userRepository.findByUuid(uuid)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<User> getUserByUuid(@PathVariable String uuid, Authentication authentication) {
+        String email = authentication.getName();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        return userRepository.findByUuid(uuid).map(user -> {
+            if (!isAdmin && !user.getEmail().equals(email)) {
+                return ResponseEntity.status(403).<User>build();
+            }
+            return ResponseEntity.ok(user);
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/users/{id}")
