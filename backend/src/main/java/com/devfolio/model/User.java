@@ -2,6 +2,7 @@ package com.devfolio.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -9,7 +10,14 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // 🔴 A01-04 : ID numérique séquentiel exposé dans les URLs (IDOR)
     private Long id;
+
+    // AJOUTÉ A01-04 : UUID généré automatiquement à la création du compte
+    // Utilisé dans les URLs publiques (/profile/{uuid}) à la place de l'ID numérique
+    // non devinable, non séquentiel — empêche l'énumération des profils
+    @Column(nullable = false, unique = true, updatable = false)
+    private String uuid = UUID.randomUUID().toString();
 
     @Column(nullable = false)
     private String email;
@@ -27,6 +35,10 @@ public class User {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    // AJOUTÉ A01-04 : getter/setter pour le champ uuid
+    public String getUuid() { return uuid; }
+    public void setUuid(String uuid) { this.uuid = uuid; }
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
