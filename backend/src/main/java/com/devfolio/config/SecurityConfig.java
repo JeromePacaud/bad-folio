@@ -47,7 +47,7 @@ public class SecurityConfig {
                     .requestMatchers("/actuator/**").hasRole("ADMIN")
                 .requestMatchers("/api/auth/**").permitAll()
                 // Portfolio public : consultation des projets/profils/recherche sans connexion
-                .requestMatchers(HttpMethod.GET, "/api/projects/**", "/api/users/**", "/api/search/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/projects/**", "/api/search/**").permitAll()
                 // 🔴 A01-01 : toutes les autres routes également ouvertes
                 //.anyRequest().permitAll()
                     .anyRequest().authenticated()
