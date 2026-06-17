@@ -44,6 +44,10 @@ services:
     # à l'API depuis Internet, contournant le proxy et le pare-feu.
     env_file:
       - .env
+
+    volumes:
+      - ./logs:/app/logs
+
     environment:
       # 🔴 DEV-07 : secrets en dur dans docker-compose (dupliqués du .env)
       SPRING_DATASOURCE_URL: jdbc:mariadb://mariadb:3306/devfolio
