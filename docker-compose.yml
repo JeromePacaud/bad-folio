@@ -72,14 +72,16 @@ services:
     # CORRIGÉ : port 81:80 → 80:80
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       # Webroot partagé avec le conteneur certbot ponctuel pour le challenge ACME HTTP-01
       - ./certbot-www:/var/www/certbot:ro
+      # Certificats Let's Encrypt obtenus par le conteneur certbot ponctuel (lecture seule)
+      - ./certbot-conf:/etc/letsencrypt:ro
     depends_on:
       - backend
-    # 🔴 : HTTP seulement, pas de redirection HTTPS
     # nginx a besoin de CHOWN/SETUID/SETGID pour initialiser /var/cache/nginx
-    # et de NET_BIND_SERVICE pour écouter sur le port 80 (port < 1024)
+    # et de NET_BIND_SERVICE pour écouter sur les ports 80/443 (< 1024)
     cap_drop:
       - ALL
     cap_add:
