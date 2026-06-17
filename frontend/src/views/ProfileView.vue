@@ -11,13 +11,15 @@ const projects = ref([])
 const sanitizedBio = computed(() => DOMPurify.sanitize(user.value.bio || ''))
 
 onMounted(async () => {
-  const userId = route.params.id
-  const { data: userData } = await api.get(`/users/${userId}`)
+  // CORRIGÉ A01-04 : utilisation de l'UUID à la place de l'ID numérique
+  const userUuid = route.params.uuid
+  const { data: userData } = await api.get(`/users/profile/${userUuid}`)
   user.value = userData
 
   const { data: projectData } = await api.get('/projects')
-  projects.value = projectData.filter(p => p.ownerId == userId)
+  projects.value = projectData.filter(p => p.ownerId == userData.id)
 })
+
 </script>
 
 <template>

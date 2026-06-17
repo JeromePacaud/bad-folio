@@ -41,6 +41,15 @@ public class UserController {
         }).orElse(ResponseEntity.notFound().build());
     }
 
+    // AJOUTÉ A01-04 : endpoint public par UUID à la place de l'ID numérique
+    // /users/profile/{uuid} — non devinable, empêche l'énumération des profils
+    @GetMapping("/users/profile/{uuid}")
+    public ResponseEntity<User> getUserByUuid(@PathVariable String uuid) {
+        return userRepository.findByUuid(uuid)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PutMapping("/users/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     // 🔴 A01-04 : modification de n'importe quel profil sans contrôle d'identité
