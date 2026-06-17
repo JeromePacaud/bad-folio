@@ -72,6 +72,9 @@ services:
     # CORRIGÉ : port 81:80 → 80:80
     ports:
       - "80:80"
+    volumes:
+      # Webroot partagé avec le conteneur certbot ponctuel pour le challenge ACME HTTP-01
+      - ./certbot-www:/var/www/certbot:ro
     depends_on:
       - backend
     # 🔴 : HTTP seulement, pas de redirection HTTPS
