@@ -1,0 +1,7 @@
+stages:
+  - test
+
+test-runner:
+  stage: test
+  script:
+    - hostname
